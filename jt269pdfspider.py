@@ -82,6 +82,9 @@ def crawling(viewid):
 
 
 if __name__ == '__main__':
-    crawling("118")
-    crawling("1523")
+    # crawling("118")
+    # crawling("1523")
     crawling("962")
+    # crawling("1002")
+    # noinspection PyArgumentEqualDefault
+    _pool.shutdown(wait=True)

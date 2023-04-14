@@ -1,4 +1,6 @@
 # -*- coding: UTF-8 -*-
+from concurrent.futures.thread import ThreadPoolExecutor
+
 import requests
 from lxml import etree
 import urllib.request
@@ -19,17 +21,24 @@ _headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
 }
 
+_pool = ThreadPoolExecutor(max_workers=100)
+
 
 def _download(p, viewid):
-    path = "./data/" + p.replace("@", "/").rsplit("/", 1)[0]
+    path = "./data/" + viewid + "/" + p.replace("@", "/").rsplit("/", 1)[0]
     filename = p.rsplit("@")[-1] + ".pdf"
-    url = "http://www.jt269.com/" + urllib.parse.quote(p + ".pdf-" + viewid)
-    print(f"download {path}/{filename} from {url}")
+    url = "http://www.jt269.com/" + urllib.parse.quote(p) + ".pdf-" + viewid
+    filepath = f"{path}/{filename}"
     os.makedirs(path, exist_ok=True)
     if os.path.exists(path + "/" + filename):
-        # already download
+        print(f"already download {filepath}")
         return
-    urllib.request.urlretrieve(url, filename=path + "/" + filename)
+
+    def _action():
+        print(f"download {filepath} from {url}")
+        urllib.request.urlretrieve(url, filename=path + "/" + filename)
+
+    _pool.submit(_action)
 
 
 def _concat_path(path, name):
@@ -70,9 +79,9 @@ def crawling(viewid):
     xml_tree_list = etree.HTML(html_resp.text).xpath("/html/body/div[4]/div[2]/div[2]/ul")
     if len(xml_tree_list) != 0:
         _crawling_tree(xml_tree_list[0], "", viewid)
-    print("OK")
 
 
 if __name__ == '__main__':
     crawling("118")
     crawling("1523")
+    crawling("962")

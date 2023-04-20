@@ -24,10 +24,10 @@ _headers = {
 _pool = ThreadPoolExecutor(max_workers=100)
 
 
-def _download(p, viewid):
+def _download(p, viewid, ext):
     path = "./data/" + viewid + "/" + p.replace("@", "/").rsplit("/", 1)[0]
-    filename = p.rsplit("@")[-1] + ".pdf"
-    url = "http://www.jt269.com/" + urllib.parse.quote(p) + ".pdf-" + viewid
+    filename = p.rsplit("@")[-1] + ext
+    url = "http://www.jt269.com/" + urllib.parse.quote(p) + ext + "-" + viewid
     filepath = f"{path}/{filename}"
     os.makedirs(path, exist_ok=True)
     if os.path.exists(path + "/" + filename):
@@ -70,8 +70,8 @@ def _crawling_tree(node, path, viewid):
                 _crawling_tree(c, new_path, viewid)
         if not find_ul:
             attr = node.attrib
-            if attr["exetn"] == ".pdf":
-                _download(new_path, viewid)
+            if attr["class"].find("pdf-end") >= 0:
+                _download(new_path, viewid, attr["exetn"])
 
 
 def crawling(viewid):
@@ -84,7 +84,8 @@ def crawling(viewid):
 if __name__ == '__main__':
     # crawling("118")
     # crawling("1523")
-    crawling("962")
+    # crawling("962")
     # crawling("1002")
+    crawling("7474")
     # noinspection PyArgumentEqualDefault
     _pool.shutdown(wait=True)
